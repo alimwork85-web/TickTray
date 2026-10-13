@@ -8,7 +8,7 @@
 
 *A tiny countdown timer that lives in your Windows system tray.*
 
-![version](https://img.shields.io/badge/version-0.0.3-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
+![version](https://img.shields.io/badge/version-0.0.3-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
 
 </div>
 
@@ -71,6 +71,10 @@ venv\Scripts\pyinstaller TickTray.spec
 | `settings_dialog.py` | نافذة الإعدادات والحركة ومفاتيح التبديل |
 | `tray_icon.py` | رسم أيقونة الصينية الحيّة |
 | `tools/make_icon.py` | مولّد الأيقونة الأصلية |
+
+## الترخيص
+
+مرخّص بموجب [MIT](LICENSE): يمكنك استخدامه وتعديله ومشاركته بحرية.
 
 ## الوسوم
 
