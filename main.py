@@ -189,8 +189,8 @@ class TickTrayApp:
         if self.state in (RUNNING, PAUSED):
             rem = self.remaining()
             shown = format_time(math.ceil(rem))
-            label = "متوقف مؤقتاً" if self.state == PAUSED else "المتبقي"
-            self.tray_icon.setToolTip(f"TickTray - {label}: {shown}")
+            # digits only, prefixed with LRM so Windows keeps Western digits (no Arabic context to shape them)
+            self.tray_icon.setToolTip("‎" + shown)
             fraction = rem / self.total_seconds if self.total_seconds else 0
             angle = int(fraction * 360)
             if force or angle != self.last_angle:
