@@ -1,0 +1,4 @@
+PyQt6>=6.6
+pyinstaller>=6.0
+# icon generation only (tools/make_icon.py):
+# pillow
