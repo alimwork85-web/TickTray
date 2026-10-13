@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (QAbstractButton, QDialog, QFrame, QGraphicsDropShad
                              QPushButton, QSpinBox, QVBoxLayout)
 
 import config
+from version import __version__
 
 EN = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
 
@@ -76,7 +77,7 @@ class SettingsDialog(QDialog):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.setWindowTitle("إعدادات TickTray")
-        self.setFixedSize(400, 480)
+        self.setFixedSize(400, 510)
         self._drag = None
 
         outer = QVBoxLayout(self)
@@ -131,6 +132,11 @@ class SettingsDialog(QDialog):
         btns.addWidget(save, 2)
         btns.addWidget(cancel, 1)
         lay.addLayout(btns)
+        ver = QLabel(f"TickTray v{__version__}")
+        ver.setObjectName("muted")
+        ver.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lay.addSpacing(6)
+        lay.addWidget(ver)
 
         self._apply_style()
         self._build_animations()
