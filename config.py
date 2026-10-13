@@ -15,6 +15,7 @@ DEFAULT_CONFIG = {
     "completionSound": True,
     "startWithWindows": False,
     "lastCustomMinutes": 20,
+    "language": None,
 }
 HARD_MAX_MINUTES = 10080
 
@@ -27,6 +28,16 @@ def setup_logging():
         filename=LOG_FILE, level=logging.INFO, encoding="utf-8",
         format="%(asctime)s %(levelname)s %(message)s",
     )
+
+
+def system_language():
+    """Arabic when the Windows UI language is Arabic, English otherwise."""
+    try:
+        import ctypes
+        lang_id = ctypes.windll.kernel32.GetUserDefaultUILanguage()
+        return "ar" if (lang_id & 0x3FF) == 0x01 else "en"
+    except Exception:
+        return "en"
 
 
 def _as_int(value, default, low, high):
@@ -43,6 +54,8 @@ def validate(raw):
     top = cfg["maximumMinutes"]
     for key in ("defaultMinutes", "defaultSnoozeMinutes", "lastCustomMinutes"):
         cfg[key] = _as_int(cfg[key], min(DEFAULT_CONFIG[key], top), 1, top)
+    if cfg["language"] not in ("ar", "en"):
+        cfg["language"] = system_language()
     cfg["completionSound"] = bool(cfg["completionSound"])
     cfg["startWithWindows"] = bool(cfg["startWithWindows"])
     return cfg

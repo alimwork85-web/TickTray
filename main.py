@@ -17,7 +17,7 @@ def show_error_and_exit(exctype, value, tb):
     try:
         from PyQt6.QtWidgets import QApplication, QMessageBox
         if QApplication.instance() is not None:
-            QMessageBox.critical(None, "TickTray Error", f"حدث خطأ أثناء التشغيل:\n\n{err_msg}")
+            QMessageBox.critical(None, "TickTray Error", f"حدث خطأ أثناء التشغيل / An error occurred:\n\n{err_msg}")
     except Exception:
         pass
     sys.exit(1)
@@ -31,6 +31,8 @@ from PyQt6.QtCore import QLocale, QLockFile, QTimer, Qt
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMenu, QMessageBox, QSystemTrayIcon
 
+import i18n
+from i18n import t
 from settings_dialog import SettingsDialog
 from tray_icon import render_icon
 
@@ -53,7 +55,8 @@ class TickTrayApp:
         QLocale.setDefault(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
         self.app = QApplication(sys.argv)
         self.app.setQuitOnLastWindowClosed(False)
-        self.app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.config = config.load_config()
+        self.apply_language()
 
         try:
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("TickTray.App")
@@ -63,10 +66,9 @@ class TickTrayApp:
         self.lock = QLockFile(os.path.join(config.APP_DIR, "TickTray.lock"))
         self.lock.setStaleLockTime(0)
         if not self.lock.tryLock(100):
-            QMessageBox.information(None, "TickTray", "TickTray يعمل بالفعل في صينية النظام.")
+            QMessageBox.information(None, "TickTray", t("already_running"))
             sys.exit(0)
 
-        self.config = config.load_config()
         self.config["startWithWindows"] = config.get_autostart()
         self.state = IDLE
         self.total_seconds = 0
@@ -96,19 +98,21 @@ class TickTrayApp:
         self.menu = QMenu()
 
         self.action_start_default = self._action("", self.start_default_timer)
-        self.quick_menu = self.menu.addMenu("أوقات سريعة")
+        self.quick_menu = self.menu.addMenu("")
+        self.quick_actions = []
         for m in QUICK_MINUTES:
-            a = QAction(f"{m} دقيقة", self.quick_menu)
+            a = QAction(self.quick_menu)
             a.triggered.connect(lambda _=False, m=m: self.start_timer(m))
             self.quick_menu.addAction(a)
-        self.action_custom = self._action("تحديد وقت مخصص...", self.set_custom_timer)
+            self.quick_actions.append((a, m))
+        self.action_custom = self._action("", self.set_custom_timer)
         self.menu.addSeparator()
-        self.action_pause_resume = self._action("إيقاف مؤقت", self.toggle_pause)
+        self.action_pause_resume = self._action("", self.toggle_pause)
         self.action_snooze = self._action("", self.snooze)
-        self.action_stop = self._action("إلغاء العداد", self.stop_timer)
+        self.action_stop = self._action("", self.stop_timer)
         self.menu.addSeparator()
-        self.action_settings = self._action("الإعدادات...", self.open_settings)
-        self.action_quit = self._action("خروج", self.quit_app)
+        self.action_settings = self._action("", self.open_settings)
+        self.action_quit = self._action("", self.quit_app)
 
         self.tray_icon.setContextMenu(self.menu)
 
@@ -120,12 +124,19 @@ class TickTrayApp:
 
     def refresh_ui(self):
         """Sync menu texts/availability, tooltip and icon with the current state."""
-        self.action_start_default.setText(f"بدء العداد ({self.config['defaultMinutes']} دقيقة)")
-        self.action_snooze.setText(f"تأجيل ({self.config['defaultSnoozeMinutes']} دقيقة)")
+        self.action_start_default.setText(t("start_default", m=self.config["defaultMinutes"]))
+        self.quick_menu.setTitle(t("quick"))
+        for a, m in self.quick_actions:
+            a.setText(t("quick_item", m=m))
+        self.action_custom.setText(t("custom"))
+        self.action_stop.setText(t("cancel_timer"))
+        self.action_settings.setText(t("settings_menu"))
+        self.action_quit.setText(t("quit"))
+        self.action_snooze.setText(t("snooze", m=self.config["defaultSnoozeMinutes"]))
         self.action_snooze.setVisible(self.state == FINISHED)
         active = self.state in (RUNNING, PAUSED)
         self.action_pause_resume.setEnabled(active)
-        self.action_pause_resume.setText("استئناف" if self.state == PAUSED else "إيقاف مؤقت")
+        self.action_pause_resume.setText(t("resume") if self.state == PAUSED else t("pause"))
         self.action_stop.setEnabled(active)
         self.update_display(force=True)
 
@@ -143,7 +154,7 @@ class TickTrayApp:
     def set_custom_timer(self):
         top = self.config["maximumMinutes"]
         minutes, ok = QInputDialog.getInt(
-            None, "ضبط العداد المخصص", "أدخل عدد الدقائق:",
+            None, t("custom_title"), t("custom_label"),
             min(self.config["lastCustomMinutes"], top), 1, top)
         if ok:
             self.config["lastCustomMinutes"] = minutes
@@ -197,11 +208,11 @@ class TickTrayApp:
                 self.last_angle = angle
                 self.tray_icon.setIcon(render_icon(fraction, show_check=False))
         elif self.state == FINISHED:
-            self.tray_icon.setToolTip("TickTray - انتهى الوقت!")
+            self.tray_icon.setToolTip(t("tip_done"))
             self.last_angle = None
             self.tray_icon.setIcon(render_icon(0.0, show_check=True))
         else:
-            self.tray_icon.setToolTip("TickTray - متوقف")
+            self.tray_icon.setToolTip(t("tip_idle"))
             self.last_angle = None
             self.tray_icon.setIcon(render_icon())
 
@@ -210,7 +221,7 @@ class TickTrayApp:
             winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
         self.tray_icon.showMessage(
             "TickTray",
-            "⏱ انتهى وقت العداد التنازلي! انقر هنا للتأجيل.",
+            t("notif"),
             QSystemTrayIcon.MessageIcon.Information,
             8000,
         )
@@ -254,12 +265,13 @@ class TickTrayApp:
         if not new_cfg:
             return
         self.config = new_cfg
+        self.apply_language()
         try:
             config.save_config(self.config)
             config.set_autostart(self.config["startWithWindows"])
         except Exception:
             logging.exception("failed to save settings")
-            QMessageBox.warning(None, "TickTray", "تعذّر حفظ الإعدادات.")
+            QMessageBox.warning(None, "TickTray", t("save_failed"))
         self.refresh_ui()
 
     def save_quietly(self):
@@ -267,6 +279,11 @@ class TickTrayApp:
             config.save_config(self.config)
         except Exception:
             logging.exception("failed to save config")
+
+    def apply_language(self):
+        i18n.set_language(self.config["language"])
+        self.app.setLayoutDirection(
+            Qt.LayoutDirection.RightToLeft if i18n.is_rtl() else Qt.LayoutDirection.LeftToRight)
 
     def quit_app(self):
         if self.settings_dialog is not None:

@@ -36,4 +36,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=['TickTray.ico'],
+    version='version_info.txt',
 )

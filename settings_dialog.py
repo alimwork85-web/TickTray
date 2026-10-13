@@ -1,10 +1,12 @@
 from PyQt6.QtCore import (QEasingCurve, QLocale, QParallelAnimationGroup, QPoint, QPropertyAnimation, QRectF, QSize,
                           Qt, pyqtProperty)
 from PyQt6.QtGui import QColor, QPainter
-from PyQt6.QtWidgets import (QAbstractButton, QDialog, QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel,
+from PyQt6.QtWidgets import (QAbstractButton, QButtonGroup, QDialog, QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel,
                              QPushButton, QSpinBox, QVBoxLayout)
 
 import config
+import i18n
+from i18n import t
 from version import __version__
 
 EN = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
@@ -71,13 +73,14 @@ class SettingsDialog(QDialog):
         self._closing = False
         self._shown = False
         self.c = DARK if dark else LIGHT
+        self.lang = cfg["language"]
 
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog |
                             Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.setWindowTitle("إعدادات TickTray")
-        self.setFixedSize(400, 510)
+        self.setLayoutDirection(Qt.LayoutDirection.RightToLeft if i18n.is_rtl() else Qt.LayoutDirection.LeftToRight)
+        self.setWindowTitle(t("win_title"))
+        self.setFixedSize(400, 580)
         self._drag = None
 
         outer = QVBoxLayout(self)
@@ -95,9 +98,9 @@ class SettingsDialog(QDialog):
         lay.setContentsMargins(24, 22, 24, 20)
         lay.setSpacing(2)
 
-        title = QLabel("الإعدادات")
+        title = QLabel(t("s_title"))
         title.setObjectName("title")
-        sub = QLabel("اضبط سلوك العداد كما يناسبك")
+        sub = QLabel(t("s_sub"))
         sub.setObjectName("muted")
         lay.addWidget(title)
         lay.addWidget(sub)
@@ -111,18 +114,19 @@ class SettingsDialog(QDialog):
         self.sound = Toggle(cfg["completionSound"], self.c["off"])
         self.auto = Toggle(cfg["startWithWindows"], self.c["off"])
 
-        lay.addWidget(self._row("المدة الافتراضية", "تُستخدم عند بدء العداد بنقرة", self.def_spin))
-        lay.addWidget(self._row("مدة التأجيل", "بعد انتهاء الوقت", self.snooze_spin))
-        lay.addWidget(self._row("الحد الأقصى", "أعلى مدة يمكن ضبطها", self.max_spin))
-        lay.addWidget(self._row("صوت التنبيه", "نغمة عند انتهاء الوقت", self.sound))
-        lay.addWidget(self._row("التشغيل مع Windows", "يبدأ تلقائياً عند تسجيل الدخول", self.auto))
+        lay.addWidget(self._row(t("s_default"), t("s_default_h"), self.def_spin))
+        lay.addWidget(self._row(t("s_snooze"), t("s_snooze_h"), self.snooze_spin))
+        lay.addWidget(self._row(t("s_max"), t("s_max_h"), self.max_spin))
+        lay.addWidget(self._row(t("s_sound"), t("s_sound_h"), self.sound))
+        lay.addWidget(self._row(t("s_auto"), t("s_auto_h"), self.auto))
+        lay.addWidget(self._row(t("s_lang"), t("s_lang_h"), self._lang_switch()))
         lay.addStretch()
 
         btns = QHBoxLayout()
         btns.setSpacing(10)
-        save = QPushButton("حفظ")
+        save = QPushButton(t("save"))
         save.setObjectName("primary")
-        cancel = QPushButton("إلغاء")
+        cancel = QPushButton(t("cancel"))
         for b in (save, cancel):
             b.setCursor(Qt.CursorShape.PointingHandCursor)
             b.setFixedHeight(38)
@@ -146,12 +150,34 @@ class SettingsDialog(QDialog):
         s.setLocale(EN)
         s.setRange(low, high)
         s.setValue(value)
-        s.setSuffix(" min")
+        s.setSuffix(t("min_suffix"))
         s.setAlignment(Qt.AlignmentFlag.AlignCenter)
         s.setFixedSize(96, 34)
         s.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
         s.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         return s
+
+    def _lang_switch(self):
+        wrap = QFrame()
+        wrap.setObjectName("segwrap")
+        wrap.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        h = QHBoxLayout(wrap)
+        h.setContentsMargins(3, 3, 3, 3)
+        h.setSpacing(2)
+        group = QButtonGroup(wrap)
+        group.setExclusive(True)
+        for code, label in (("ar", "العربية"), ("en", "English")):
+            b = QPushButton(label)
+            b.setObjectName("seg")
+            b.setCheckable(True)
+            b.setChecked(self.lang == code)
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            b.setFixedSize(66, 28)
+            b.clicked.connect(lambda _=False, c=code: setattr(self, "lang", c))
+            group.addButton(b)
+            h.addWidget(b)
+        self._lang_group = group
+        return wrap
 
     def _row(self, title, hint, widget):
         row = QFrame()
@@ -188,6 +214,10 @@ class SettingsDialog(QDialog):
             QPushButton {{ background: {c['field']}; color: {c['text']}; border: none; border-radius: 10px;
                            font-size: 13px; }}
             QPushButton:hover {{ background: {c['hover']}; }}
+            QFrame#segwrap {{ background: {c['field']}; border-radius: 10px; }}
+            QPushButton#seg {{ background: transparent; border-radius: 8px; font-size: 12px; }}
+            QPushButton#seg:hover {{ background: {c['hover']}; }}
+            QPushButton#seg:checked {{ background: {ACCENT}; color: white; font-weight: 600; }}
             QPushButton#primary {{ background: {ACCENT}; color: white; font-weight: 600; }}
             QPushButton#primary:hover {{ background: {ACCENT_HOVER}; }}
         """)
@@ -242,6 +272,7 @@ class SettingsDialog(QDialog):
             "defaultSnoozeMinutes": self.snooze_spin.value(),
             "completionSound": self.sound.isChecked(),
             "startWithWindows": self.auto.isChecked(),
+            "language": self.lang,
         })
         self.result_config = config.validate(cfg)
         self.accept()

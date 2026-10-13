@@ -4,15 +4,92 @@
 
 # TickTray ⏱
 
-**عدّاد تنازلي خفيف يعيش في صينية النظام — نقرة واحدة وتبدأ، ويُنبّهك حين ينتهي الوقت.**
+**A tiny countdown timer that lives in your Windows system tray: one click to start, and it alerts you when time is up.**
 
-*A tiny countdown timer that lives in your Windows system tray.*
+![version](https://img.shields.io/badge/version-0.1.0-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
 
-![version](https://img.shields.io/badge/version-0.0.3-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
+**English** · [العربية](#العربية)
+
+[**⬇ Download TickTray.exe**](https://github.com/alimwork85-web/TickTray/releases/latest/download/TickTray.exe)
+
+<img src="assets/settings.png" width="320" alt="Settings window">
 
 </div>
 
 ---
+
+# English
+
+## Goal
+
+Sometimes all you need is a quick timer: coffee on the stove, a break between work sessions, a reminder in 20 minutes. No heavy app, no window taking over your screen.
+**TickTray** stays quietly in the system tray, shows the remaining time when you hover over its icon, and alerts you with a sound and a notification when time is up.
+
+## Features
+
+- 🖱️ **One click**: left-click the tray icon to start the timer; click again to pause or resume.
+- 🔵 **Live icon**: a ring on the icon itself shrinks as time runs out, so you see progress without opening anything.
+- 🔢 **Digits only**: hover to see the countdown, e.g. `19:36`, always in Western digits (0-9).
+- ⚡ **Quick times**: 5 / 10 / 25 / 45 minutes, or a custom time that the app remembers.
+- 😴 **Snooze**: click the notification (or pick "Snooze" from the menu) when time is up.
+- 🌐 **Arabic and English**: switch the language from Settings (menus, notifications and windows, right-to-left for Arabic). The first run follows your Windows language.
+- ⚙️ **Modern settings**: animated window with light and dark themes; configure default duration, snooze length, maximum duration, alert sound and language.
+- 🚀 **Start with Windows**: optional auto-start at sign-in.
+- 🛡️ **Single instance**: running it twice never creates a second icon.
+- ⏳ **Accurate**: time is computed from a fixed deadline, so it does not drift over long durations.
+
+## Download and run
+
+1. Go to [**Releases**](../../releases) and download `TickTray.exe`.
+2. Run it directly: no installer, no admin rights. The icon appears in the system tray (it may be behind the ^ arrow).
+3. Right-click the icon to open the menu.
+
+> **Note:** the file is not code-signed, so Windows SmartScreen may show a warning on first run. Click "More info", then "Run anyway".
+
+Settings are stored in `%APPDATA%\TickTray\config.json`, and the error log in `TickTray.log` next to it.
+
+## Run from source
+
+```bash
+python -m venv venv
+venv\Scripts\pip install -r requirements.txt
+venv\Scripts\python main.py
+```
+
+Build the EXE (the file version shown in Windows properties comes from `version.py`):
+
+```bash
+venv\Scripts\python tools\make_version_info.py
+venv\Scripts\pyinstaller TickTray.spec
+```
+
+The output is `dist\TickTray.exe`. The icon is drawn entirely in code by `tools/make_icon.py` (requires Pillow).
+
+## Project layout
+
+| File | Role |
+|---|---|
+| `main.py` | Tray icon, menu and timer |
+| `config.py` | Loading, validating and saving settings; start with Windows |
+| `i18n.py` | Arabic / English strings |
+| `settings_dialog.py` | Settings window, animation and toggle switches |
+| `tray_icon.py` | Live tray icon rendering |
+| `version.py` | Single source of the version number |
+| `tools/` | Icon generator and version-resource generator |
+
+## License
+
+Released under the [MIT License](LICENSE): free to use, modify and share.
+
+## Tags
+
+`#TickTray` `#Timer` `#CountdownTimer` `#SystemTray` `#Windows` `#Windows11` `#PyQt6` `#Python` `#Productivity` `#Pomodoro` `#Arabic` `#RTL` `#Bilingual`
+
+---
+
+<div dir="rtl">
+
+# العربية
 
 ## الهدف
 
@@ -26,15 +103,11 @@
 - 🔢 **أرقام فقط**: عند مرور الفأرة يظهر العدّ التنازلي مثل `19:36`، وبأرقام غربية (0-9) دائماً.
 - ⚡ **أوقات سريعة**: 5 / 10 / 25 / 45 دقيقة، أو وقت مخصص يتذكّره البرنامج.
 - 😴 **تأجيل**: عند انتهاء الوقت انقر الإشعار (أو اختر «تأجيل» من القائمة) لتأجيل التنبيه.
-- ⚙️ **إعدادات عصرية**: نافذة بحركة انسيابية، تدعم الوضعين الفاتح والداكن، وتتحكم في المدة الافتراضية ومدة التأجيل والحد الأقصى وصوت التنبيه.
+- 🌐 **عربي وإنجليزي**: بدّل اللغة من الإعدادات (القوائم والإشعارات والنوافذ، ومن اليمين إلى اليسار في العربية). في أول تشغيل يتبع لغة Windows لديك.
+- ⚙️ **إعدادات عصرية**: نافذة بحركة انسيابية، تدعم الوضعين الفاتح والداكن، وتتحكم في المدة الافتراضية ومدة التأجيل والحد الأقصى وصوت التنبيه واللغة.
 - 🚀 **تشغيل مع Windows**: خيار لبدء البرنامج تلقائياً عند تسجيل الدخول.
 - 🛡️ **نسخة واحدة فقط**: لا تتكرر الأيقونة إن شغّلته مرتين.
 - ⏳ **دقيق**: يحسب الوقت من موعد انتهاء ثابت، فلا يتراكم عليه انحراف مع طول المدة.
-- 🇸🇦 **واجهة عربية** كاملة (من اليمين إلى اليسار).
-
-<div align="center">
-<img src="assets/settings.png" width="320" alt="نافذة الإعدادات">
-</div>
 
 ## التحميل والتشغيل
 
@@ -48,29 +121,7 @@
 
 ## التشغيل من المصدر
 
-```bash
-python -m venv venv
-venv\Scripts\pip install -r requirements.txt
-venv\Scripts\python main.py
-```
-
-لبناء ملف EXE:
-
-```bash
-venv\Scripts\pyinstaller TickTray.spec
-```
-
-الناتج في `dist\TickTray.exe`. وتُرسم الأيقونة بالكامل من الكود عبر `tools/make_icon.py` (يحتاج Pillow).
-
-## بنية المشروع
-
-| الملف | الدور |
-|---|---|
-| `main.py` | الصينية والقائمة والعداد |
-| `config.py` | تحميل الإعدادات والتحقق منها وحفظها والتشغيل مع Windows |
-| `settings_dialog.py` | نافذة الإعدادات والحركة ومفاتيح التبديل |
-| `tray_icon.py` | رسم أيقونة الصينية الحيّة |
-| `tools/make_icon.py` | مولّد الأيقونة الأصلية |
+الأوامر نفسها الموضحة في القسم الإنجليزي أعلاه (`pip install -r requirements.txt` ثم `python main.py`). وللبناء: `python tools\make_version_info.py` ثم `pyinstaller TickTray.spec`. الناتج في `dist\TickTray.exe`، ورقم الإصدار الظاهر في خصائص الملف مصدره `version.py`. وتُرسم الأيقونة بالكامل من الكود عبر `tools/make_icon.py` (يحتاج Pillow).
 
 ## الترخيص
 
@@ -80,3 +131,4 @@ venv\Scripts\pyinstaller TickTray.spec
 
 `#TickTray` `#Timer` `#CountdownTimer` `#SystemTray` `#Windows` `#Windows11` `#PyQt6` `#Python` `#Productivity` `#Pomodoro` `#Arabic` `#RTL` `#عداد` `#مؤقت` `#الإنتاجية` `#أدوات_ويندوز`
 
+</div>
