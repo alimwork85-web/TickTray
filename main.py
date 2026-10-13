@@ -50,6 +50,24 @@ def format_time(seconds):
     return f"{h:02d}:{m:02d}:{s:02d}" if h else f"{m:02d}:{s:02d}"
 
 
+ALARM_WAV = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Media", "Alarm01.wav")
+
+
+def play_alarm():
+    """A clearly audible alarm. MessageBeep alone is often a faint system sound (or none at all)."""
+    try:
+        if os.path.exists(ALARM_WAV):
+            winsound.PlaySound(ALARM_WAV, winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT)
+        else:
+            winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
+    except Exception:
+        logging.exception("alarm sound failed")
+        try:
+            winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+        except Exception:
+            pass
+
+
 def icon_label(seconds):
     """Short label drawn on the tray icon: minutes left, or hours once it no longer fits in 2 digits."""
     minutes = math.ceil(max(0, seconds) / 60)
@@ -229,7 +247,7 @@ class TickTrayApp:
 
     def on_timer_finished(self):
         if self.config.get("completionSound"):
-            winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+            play_alarm()
         self.tray_icon.showMessage(
             "TickTray",
             t("notif"),
