@@ -50,6 +50,14 @@ def format_time(seconds):
     return f"{h:02d}:{m:02d}:{s:02d}" if h else f"{m:02d}:{s:02d}"
 
 
+def icon_label(seconds):
+    """Short label drawn on the tray icon: minutes left, or hours once it no longer fits in 2 digits."""
+    minutes = math.ceil(max(0, seconds) / 60)
+    if minutes <= 99:
+        return str(minutes)
+    return f"{math.ceil(minutes / 60)}h"
+
+
 class TickTrayApp:
     def __init__(self):
         QLocale.setDefault(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
@@ -75,6 +83,7 @@ class TickTrayApp:
         self.deadline = 0.0
         self.paused_remaining = 0.0
         self.last_angle = None
+        self.last_label = None
         self.settings_dialog = None
 
         self.app_icon = QIcon(ICON_PATH) if os.path.exists(ICON_PATH) else render_icon()
@@ -204,9 +213,11 @@ class TickTrayApp:
             self.tray_icon.setToolTip("‎" + shown)
             fraction = rem / self.total_seconds if self.total_seconds else 0
             angle = int(fraction * 360)
-            if force or angle != self.last_angle:
+            label = icon_label(rem)
+            if force or angle != self.last_angle or label != self.last_label:
                 self.last_angle = angle
-                self.tray_icon.setIcon(render_icon(fraction, show_check=False))
+                self.last_label = label
+                self.tray_icon.setIcon(render_icon(fraction, show_check=False, text=label))
         elif self.state == FINISHED:
             self.tray_icon.setToolTip(t("tip_done"))
             self.last_angle = None

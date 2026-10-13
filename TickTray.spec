@@ -1,4 +1,17 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
+
+# Qt modules the app never imports (only QtCore/QtGui/QtWidgets are used).
+QT_EXCLUDES = [
+    'PyQt6.QtNetwork', 'PyQt6.QtSvg', 'PyQt6.QtPdf', 'PyQt6.QtOpenGL', 'PyQt6.QtOpenGLWidgets',
+    'PyQt6.QtQml', 'PyQt6.QtQuick', 'PyQt6.QtMultimedia', 'PyQt6.QtPrintSupport', 'PyQt6.QtDBus',
+]
+# DLLs the PyQt6 hook bundles anyway. Only the .ico image plugin is needed (to load TickTray.ico).
+DROP_BINARIES = {
+    'opengl32sw.dll', 'qt6pdf.dll', 'qt6svg.dll', 'qt6network.dll',
+    'qtuiotouchplugin.dll', 'qsvgicon.dll', 'qminimal.dll', 'qoffscreen.dll',
+    'qgif.dll', 'qicns.dll', 'qjpeg.dll', 'qpdf.dll', 'qsvg.dll', 'qtga.dll', 'qtiff.dll', 'qwbmp.dll', 'qwebp.dll',
+}
 
 
 a = Analysis(
@@ -10,10 +23,11 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['tkinter', 'unittest'],
+    excludes=['tkinter', 'unittest'] + QT_EXCLUDES,
     noarchive=False,
     optimize=0,
 )
+a.binaries = [b for b in a.binaries if os.path.basename(b[0]).lower() not in DROP_BINARIES]
 pyz = PYZ(a.pure)
 
 exe = EXE(

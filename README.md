@@ -6,7 +6,7 @@
 
 **A tiny countdown timer that lives in your Windows system tray: one click to start, and it alerts you when time is up.**
 
-![version](https://img.shields.io/badge/version-0.1.0-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
+![version](https://img.shields.io/badge/version-0.2.0-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
 
 **English** · [العربية](#العربية)
 
@@ -28,7 +28,7 @@ Sometimes all you need is a quick timer: coffee on the stove, a break between wo
 ## Features
 
 - 🖱️ **One click**: left-click the tray icon to start the timer; click again to pause or resume.
-- 🔵 **Live icon**: a ring on the icon itself shrinks as time runs out, so you see progress without opening anything.
+- 🔵 **Live icon**: the icon shows the minutes left (or hours, e.g. `2h`, past 99 minutes) inside a ring that shrinks as time runs out, so you see it without hovering.
 - 🔢 **Digits only**: hover to see the countdown, e.g. `19:36`, always in Western digits (0-9).
 - ⚡ **Quick times**: 5 / 10 / 25 / 45 minutes, or a custom time that the app remembers.
 - 😴 **Snooze**: click the notification (or pick "Snooze" from the menu) when time is up.
@@ -36,6 +36,7 @@ Sometimes all you need is a quick timer: coffee on the stove, a break between wo
 - ⚙️ **Modern settings**: animated window with light and dark themes; configure default duration, snooze length, maximum duration, alert sound and language.
 - 🚀 **Start with Windows**: optional auto-start at sign-in.
 - 🛡️ **Single instance**: running it twice never creates a second icon.
+- 🪶 **Lighter EXE**: unused Qt modules are left out of the build (about 26 MB instead of 38 MB).
 - ⏳ **Accurate**: time is computed from a fixed deadline, so it does not drift over long durations.
 
 ## Download and run
@@ -99,7 +100,7 @@ Released under the [MIT License](LICENSE): free to use, modify and share.
 ## المميزات
 
 - 🖱️ **نقرة واحدة**: نقرة يسار على الأيقونة تبدأ العداد، ونقرة أخرى توقفه مؤقتاً أو تستأنفه.
-- 🔵 **أيقونة حيّة**: حلقة على الأيقونة نفسها تتناقص مع الوقت المتبقي، فترى التقدّم دون فتح أي شيء.
+- 🔵 **أيقونة حيّة**: تعرض الأيقونة نفسها الدقائق المتبقية (أو الساعات مثل `2h` إذا تجاوزت 99 دقيقة) داخل حلقة تتناقص مع الوقت، فتراها دون المرور بالفأرة.
 - 🔢 **أرقام فقط**: عند مرور الفأرة يظهر العدّ التنازلي مثل `19:36`، وبأرقام غربية (0-9) دائماً.
 - ⚡ **أوقات سريعة**: 5 / 10 / 25 / 45 دقيقة، أو وقت مخصص يتذكّره البرنامج.
 - 😴 **تأجيل**: عند انتهاء الوقت انقر الإشعار (أو اختر «تأجيل» من القائمة) لتأجيل التنبيه.
@@ -107,6 +108,7 @@ Released under the [MIT License](LICENSE): free to use, modify and share.
 - ⚙️ **إعدادات عصرية**: نافذة بحركة انسيابية، تدعم الوضعين الفاتح والداكن، وتتحكم في المدة الافتراضية ومدة التأجيل والحد الأقصى وصوت التنبيه واللغة.
 - 🚀 **تشغيل مع Windows**: خيار لبدء البرنامج تلقائياً عند تسجيل الدخول.
 - 🛡️ **نسخة واحدة فقط**: لا تتكرر الأيقونة إن شغّلته مرتين.
+- 🪶 **ملف أخف**: تُستبعد وحدات Qt غير المستخدمة من البناء (نحو 26 MB بدل 38 MB).
 - ⏳ **دقيق**: يحسب الوقت من موعد انتهاء ثابت، فلا يتراكم عليه انحراف مع طول المدة.
 
 ## التحميل والتشغيل
