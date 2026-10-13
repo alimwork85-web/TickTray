@@ -8,7 +8,7 @@
 
 *A tiny countdown timer that lives in your Windows system tray.*
 
-![version](https://img.shields.io/badge/version-0.0.2-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![python](https://img.shields.io/badge/Python-3.10%2B-fbbf24)
+![version](https://img.shields.io/badge/version-0.0.3-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
 
 </div>
 
