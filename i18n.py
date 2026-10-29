@@ -12,6 +12,7 @@ STRINGS = {
     "custom": ("تحديد وقت مخصص...", "Custom time..."),
     "pause": ("إيقاف مؤقت", "Pause"),
     "resume": ("استئناف", "Resume"),
+    "extend5": ("‎+5 دقائق", "+5 min"),
     "snooze": ("تأجيل ({m} دقيقة)", "Snooze ({m} min)"),
     "cancel_timer": ("إلغاء العداد", "Cancel timer"),
     "settings_menu": ("الإعدادات...", "Settings..."),

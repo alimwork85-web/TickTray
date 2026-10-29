@@ -156,6 +156,7 @@ class TickTrayApp:
         self.action_custom = self._action("", self.set_custom_timer)
         self.menu.addSeparator()
         self.action_pause_resume = self._action("", self.toggle_pause)
+        self.action_extend = self._action("", self.add_five_minutes)
         self.action_snooze = self._action("", self.snooze)
         self.action_stop = self._action("", self.stop_timer)
         self.menu.addSeparator()
@@ -178,6 +179,8 @@ class TickTrayApp:
             a.setText(t("quick_item", m=m))
         self.action_custom.setText(t("custom"))
         self.action_stop.setText(t("cancel_timer"))
+        self.action_extend.setText(t("extend5"))
+        self.action_extend.setEnabled(self.state != IDLE)
         self.action_settings.setText(t("settings_menu"))
         self.action_quit.setText(t("quit"))
         self.action_snooze.setText(t("snooze", m=self.config["defaultSnoozeMinutes"]))
@@ -229,6 +232,23 @@ class TickTrayApp:
             self.deadline = time.monotonic() + self.paused_remaining
             self.state = RUNNING
             self.timer.start()
+        self.refresh_ui()
+
+    def add_five_minutes(self):
+        """Extend the running/paused timer by 5 minutes, or start a fresh 5-minute one after it finished."""
+        if self.state == FINISHED:
+            self.start_timer(min(5, self.config["maximumMinutes"]))
+            return
+        if self.state not in (RUNNING, PAUSED):
+            return
+        extra = min(300.0, self.config["maximumMinutes"] * 60 - self.remaining())
+        if extra <= 0:
+            return
+        self.total_seconds += extra
+        if self.state == RUNNING:
+            self.deadline += extra
+        else:
+            self.paused_remaining += extra
         self.refresh_ui()
 
     def stop_timer(self):
