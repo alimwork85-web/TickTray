@@ -12,7 +12,7 @@ STRINGS = {
     "custom": ("تحديد وقت مخصص...", "Custom time..."),
     "until": ("حتى الساعة...", "Until a time..."),
     "until_title": ("المؤقت حتى الساعة", "Timer until a time"),
-    "until_label": ("الوقت (24 ساعة):", "Time (24-hour):"),
+    "until_label": ("الوقت (بنظام 24 ساعة):", "Time (24-hour):"),
     "until_too_long": ("المدة تتجاوز الحد الأقصى ({mm}).", "Longer than the maximum duration ({mm})."),
     "pause": ("إيقاف مؤقت", "Pause"),
     "resume": ("استئناف", "Resume"),
@@ -26,7 +26,7 @@ STRINGS = {
     "name_label": ("الاسم (اختياري)", "Name (optional)"),
     "notif": ("⏱ انتهى وقت العداد التنازلي! انقر هنا للتأجيل.", "⏱ Time's up! Click here to snooze."),
     "notif_named": ("⏱ انتهى وقت «{name}»! انقر هنا للتأجيل.", "⏱ {name} is done! Click here to snooze."),
-    "already_running": ("TickTray يعمل بالفعل في صينية النظام.", "TickTray is already running in the system tray."),
+    "already_running": ("TickTray يعمل بالفعل في منطقة الإشعارات.", "TickTray is already running in the system tray."),
     "save_failed": ("تعذّر حفظ الإعدادات.", "Could not save the settings."),
     "error_msg": ("حدث خطأ أثناء التشغيل:", "An error occurred:"),
     # settings window
