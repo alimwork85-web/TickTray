@@ -5,3 +5,5 @@ __pycache__/
 *.pyc
 config.json
 *.log
+PLAN.md
+AGENTS.md
