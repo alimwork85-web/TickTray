@@ -51,7 +51,7 @@ Sometimes all you need is a quick timer: coffee on the stove, a break between wo
 2. Run it directly: no installer, no admin rights. The icon appears in the system tray (it may be behind the ^ arrow).
 3. Right-click the icon to open the menu.
 
-> **Note:** the file is not code-signed, so Windows SmartScreen may show a warning on first run. Click "More info", then "Run anyway".
+> **Note:** the EXE carries an Authenticode signature (SHA-256, timestamped) with a self-signed certificate, so Windows shows the publisher name but does not trust it by default. SmartScreen may still warn on first run. Click "More info", then "Run anyway".
 
 Settings are stored in `%APPDATA%\TickTray\config.json`, and the error log in `TickTray.log` next to it.
 
@@ -129,7 +129,7 @@ Released under the [MIT License](LICENSE): free to use, modify and share.
 2. شغّله مباشرة، فلا يحتاج تثبيتاً ولا صلاحيات مدير. ستجد الأيقونة في صينية النظام (قد تكون خلف السهم ^).
 3. انقر بيمين الفأرة على الأيقونة لفتح القائمة.
 
-> **تنبيه:** الملف غير موقَّع رقمياً، لذلك قد تعرض Windows SmartScreen تحذيراً عند أول تشغيل. اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».
+> **تنبيه:** الملف موقَّع رقمياً (SHA-256 ومختوم بالوقت) بشهادة موقّعة ذاتياً، لذلك تُظهر Windows اسم الناشر لكنها لا تثق بالشهادة تلقائياً. قد يعرض SmartScreen تحذيراً عند أول تشغيل. اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».
 
 تُحفظ إعداداتك في `%APPDATA%\TickTray\config.json`، وسجل الأخطاء في `TickTray.log` بجانبه.
 
