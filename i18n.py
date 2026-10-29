@@ -16,7 +16,7 @@ STRINGS = {
     "until_too_long": ("المدة تتجاوز الحد الأقصى ({m} دقيقة).", "Longer than the maximum duration ({m} min)."),
     "pause": ("إيقاف مؤقت", "Pause"),
     "resume": ("استئناف", "Resume"),
-    "extend5": ("‎+5 دقائق", "+5 min"),
+    "extend5": ("إضافة 5 دقائق", "+5 min"),
     "snooze": ("تأجيل ({m} دقيقة)", "Snooze ({m} min)"),
     "cancel_timer": ("إلغاء العداد", "Cancel timer"),
     "settings_menu": ("الإعدادات...", "Settings..."),

@@ -6,7 +6,7 @@
 
 **A tiny countdown timer that lives in your Windows system tray: one click to start, and it alerts you when time is up.**
 
-![version](https://img.shields.io/badge/version-0.3.0-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
+![version](https://img.shields.io/badge/version-0.3.1-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
 
 **English** · [العربية](#العربية)
 

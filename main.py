@@ -32,7 +32,7 @@ from PyQt6.QtCore import QAbstractNativeEventFilter, QLocale, QLockFile, QTime, 
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QDialogButtonBox, QLabel, QLineEdit, QMenu, QMessageBox, QSpinBox,
-    QSystemTrayIcon, QTimeEdit, QVBoxLayout,
+    QSystemTrayIcon, QTimeEdit, QVBoxLayout, QWidget,
 )
 
 import i18n
@@ -129,14 +129,21 @@ class ClockTimeDialog(QDialog):
     def __init__(self, initial_minutes):
         super().__init__()
         self.setWindowTitle(t("until_title"))
-        self.time_edit = QTimeEdit()
+        # RTL mirrors the displayed time (08:27 shows as 27:08) and the widget's own
+        # layout direction is not enough: it has to be created inside an LTR container.
+        ltr_box = QWidget()
+        ltr_box.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        box_layout = QVBoxLayout(ltr_box)
+        box_layout.setContentsMargins(0, 0, 0, 0)
+        self.time_edit = QTimeEdit(ltr_box)
         self.time_edit.setDisplayFormat("HH:mm")
         self.time_edit.setLocale(EN_LOCALE)  # Western digits in both languages
         self.time_edit.setTime(QTime.currentTime().addSecs(initial_minutes * 60))
+        box_layout.addWidget(self.time_edit)
         self.name_edit = _name_field()
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel(t("until_label")))
-        layout.addWidget(self.time_edit)
+        layout.addWidget(ltr_box)
         layout.addWidget(self.name_edit)
         layout.addWidget(_dialog_buttons(self))
 
@@ -155,6 +162,7 @@ class CustomTimeDialog(QDialog):
         self.setWindowTitle(t("custom_title"))
         self.minutes_edit = QSpinBox()
         self.minutes_edit.setLocale(EN_LOCALE)
+        self.minutes_edit.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.minutes_edit.setRange(1, top_minutes)
         self.minutes_edit.setValue(min(initial_minutes, top_minutes))
         self.minutes_edit.setSuffix(t("min_suffix"))
