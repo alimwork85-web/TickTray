@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import traceback
+from ctypes import wintypes
 
 import config
 
@@ -27,7 +28,7 @@ sys.excepthook = show_error_and_exit
 
 import winsound
 
-from PyQt6.QtCore import QLocale, QLockFile, QTime, QTimer, Qt
+from PyQt6.QtCore import QAbstractNativeEventFilter, QLocale, QLockFile, QTime, QTimer, Qt
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QDialogButtonBox, QLabel, QLineEdit, QMenu, QMessageBox, QSpinBox,
@@ -42,6 +43,9 @@ from tray_icon import render_icon
 QUICK_MINUTES = (5, 10, 25, 45)
 IDLE, RUNNING, PAUSED, FINISHED = range(4)
 EN_LOCALE = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
+HOTKEY_ID = 1
+WM_HOTKEY = 0x0312
+MOD_ALT, MOD_CONTROL, MOD_NOREPEAT = 0x0001, 0x0002, 0x4000
 
 BASE_DIR = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 ICON_PATH = os.path.join(BASE_DIR, "TickTray.ico")
@@ -168,6 +172,21 @@ class CustomTimeDialog(QDialog):
         return self.name_edit.text().strip()
 
 
+class HotkeyFilter(QAbstractNativeEventFilter):
+    """Turns the WM_HOTKEY message into the same action as clicking the tray icon."""
+
+    def __init__(self, on_hotkey):
+        super().__init__()
+        self.on_hotkey = on_hotkey
+
+    def nativeEventFilter(self, eventType, message):
+        if eventType in (b"windows_dispatcher_MSG", b"windows_generic_MSG"):
+            msg = ctypes.cast(int(message), ctypes.POINTER(wintypes.MSG)).contents
+            if msg.message == WM_HOTKEY and msg.wParam == HOTKEY_ID:
+                self.on_hotkey()
+        return False, 0
+
+
 class TickTrayApp:
     def __init__(self):
         QLocale.setDefault(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
@@ -196,6 +215,7 @@ class TickTrayApp:
         self.last_angle = None
         self.last_label = None
         self.settings_dialog = None
+        self.hotkey_filter = None
 
         self.app_icon = QIcon(ICON_PATH) if os.path.exists(ICON_PATH) else render_icon()
         self.app.setWindowIcon(self.app_icon)
@@ -218,6 +238,7 @@ class TickTrayApp:
         self.tray_icon.show()
         if self.state == FINISHED:
             self.notify()  # ended while TickTray was closed: show it, but do not alarm
+        self.register_hotkey()
 
     # ---- menu -------------------------------------------------------------------------------------------------
     def create_menu(self):
@@ -433,6 +454,23 @@ class TickTrayApp:
         self.remember_timer()
 
     # ---- tray interaction -------------------------------------------------------------------------------------
+    def register_hotkey(self):
+        """Ctrl+Alt+T from any app: same as clicking the tray icon."""
+        try:
+            registered = ctypes.windll.user32.RegisterHotKey(
+                None, HOTKEY_ID, MOD_CONTROL | MOD_ALT | MOD_NOREPEAT, ord("T"))
+        except Exception:
+            logging.exception("hotkey registration failed")
+            return
+        if not registered:
+            logging.warning("Ctrl+Alt+T is already taken by another app; the global hotkey is off")
+            return
+        self.hotkey_filter = HotkeyFilter(self.on_hotkey)
+        self.app.installNativeEventFilter(self.hotkey_filter)
+
+    def on_hotkey(self):
+        self.on_activated(QSystemTrayIcon.ActivationReason.Trigger)
+
     def on_activated(self, reason):
         if reason != QSystemTrayIcon.ActivationReason.Trigger:
             return
@@ -493,6 +531,10 @@ class TickTrayApp:
 
     def quit_app(self):
         stop_alarm()
+        try:
+            ctypes.windll.user32.UnregisterHotKey(None, HOTKEY_ID)
+        except Exception:
+            logging.exception("hotkey unregistration failed")
         if self.settings_dialog is not None:
             self.settings_dialog.force_close()
         self.app.quit()
