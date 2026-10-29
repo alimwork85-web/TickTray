@@ -10,6 +10,10 @@ STRINGS = {
     "quick": ("أوقات سريعة", "Quick times"),
     "quick_item": ("{m} دقيقة", "{m} min"),
     "custom": ("تحديد وقت مخصص...", "Custom time..."),
+    "until": ("حتى الساعة...", "Until a time..."),
+    "until_title": ("المؤقت حتى الساعة", "Timer until a time"),
+    "until_label": ("الوقت (24 ساعة):", "Time (24-hour):"),
+    "until_too_long": ("المدة تتجاوز الحد الأقصى ({m} دقيقة).", "Longer than the maximum duration ({m} min)."),
     "pause": ("إيقاف مؤقت", "Pause"),
     "resume": ("استئناف", "Resume"),
     "extend5": ("‎+5 دقائق", "+5 min"),
@@ -41,6 +45,7 @@ STRINGS = {
     "s_lang_h": ("لغة القوائم والنوافذ", "Language of menus and windows"),
     "save": ("حفظ", "Save"),
     "cancel": ("إلغاء", "Cancel"),
+    "ok": ("موافق", "OK"),
     "min_suffix": (" د", " min"),
 }
 

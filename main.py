@@ -27,9 +27,12 @@ sys.excepthook = show_error_and_exit
 
 import winsound
 
-from PyQt6.QtCore import QLocale, QLockFile, QTimer, Qt
+from PyQt6.QtCore import QLocale, QLockFile, QTime, QTimer, Qt
 from PyQt6.QtGui import QAction, QIcon
-from PyQt6.QtWidgets import QApplication, QInputDialog, QMenu, QMessageBox, QSystemTrayIcon
+from PyQt6.QtWidgets import (
+    QApplication, QDialog, QDialogButtonBox, QInputDialog, QLabel, QMenu, QMessageBox,
+    QSystemTrayIcon, QTimeEdit, QVBoxLayout,
+)
 
 import i18n
 from i18n import t
@@ -97,6 +100,31 @@ def icon_label(seconds):
     return f"{math.ceil(minutes / 60)}h"
 
 
+class ClockTimeDialog(QDialog):
+    """Asks for a clock time (HH:mm, 24-hour) in Western digits."""
+
+    def __init__(self, initial_minutes):
+        super().__init__()
+        self.setWindowTitle(t("until_title"))
+        self.time_edit = QTimeEdit()
+        self.time_edit.setDisplayFormat("HH:mm")
+        # English locale keeps the numbers Western in both languages
+        self.time_edit.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
+        self.time_edit.setTime(QTime.currentTime().addSecs(initial_minutes * 60))
+        buttons = QDialogButtonBox()
+        buttons.addButton(t("ok"), QDialogButtonBox.ButtonRole.AcceptRole)
+        buttons.addButton(t("cancel"), QDialogButtonBox.ButtonRole.RejectRole)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel(t("until_label")))
+        layout.addWidget(self.time_edit)
+        layout.addWidget(buttons)
+
+    def time(self):
+        return self.time_edit.time()
+
+
 class TickTrayApp:
     def __init__(self):
         QLocale.setDefault(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
@@ -154,6 +182,7 @@ class TickTrayApp:
             self.quick_menu.addAction(a)
             self.quick_actions.append((a, m))
         self.action_custom = self._action("", self.set_custom_timer)
+        self.action_until = self._action("", self.set_timer_until)
         self.menu.addSeparator()
         self.action_pause_resume = self._action("", self.toggle_pause)
         self.action_extend = self._action("", self.add_five_minutes)
@@ -178,6 +207,7 @@ class TickTrayApp:
         for a, m in self.quick_actions:
             a.setText(t("quick_item", m=m))
         self.action_custom.setText(t("custom"))
+        self.action_until.setText(t("until"))
         self.action_stop.setText(t("cancel_timer"))
         self.action_extend.setText(t("extend5"))
         self.action_extend.setEnabled(self.state != IDLE)
@@ -212,9 +242,22 @@ class TickTrayApp:
             self.save_quietly()
             self.start_timer(minutes)
 
-    def start_timer(self, minutes):
+    def set_timer_until(self):
+        dlg = ClockTimeDialog(self.config["defaultMinutes"])
+        dlg.setWindowIcon(self.app_icon)
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+        seconds = QTime.currentTime().secsTo(dlg.time())
+        if seconds <= 0:
+            seconds += 24 * 3600  # that time already passed today: aim at tomorrow
+        if seconds > self.config["maximumMinutes"] * 60:
+            QMessageBox.warning(None, "TickTray", t("until_too_long", m=self.config["maximumMinutes"]))
+            return
+        self.start_timer(0, seconds=seconds)
+
+    def start_timer(self, minutes, seconds=None):
         stop_alarm()
-        self.total_seconds = minutes * 60
+        self.total_seconds = seconds if seconds is not None else minutes * 60
         self.deadline = time.monotonic() + self.total_seconds
         self.state = RUNNING
         self.timer.start()
