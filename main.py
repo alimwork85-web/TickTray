@@ -52,12 +52,33 @@ def format_time(seconds):
 
 ALARM_WAV = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Media", "Alarm01.wav")
 
+alarm_stop_timer = None  # single-shot QTimer that silences the repeating alarm
+
+
+def stop_alarm():
+    """Silence the alarm at once and cancel its pending auto-stop."""
+    global alarm_stop_timer
+    if alarm_stop_timer is not None:
+        alarm_stop_timer.stop()
+    try:
+        winsound.PlaySound(None, 0)
+    except Exception:
+        logging.exception("stopping the alarm sound failed")
+
 
 def play_alarm():
-    """A clearly audible alarm. MessageBeep alone is often a faint system sound (or none at all)."""
+    """A clearly audible alarm that keeps repeating until stopped. MessageBeep alone is often a faint system sound (or none at all)."""
+    global alarm_stop_timer
     try:
         if os.path.exists(ALARM_WAV):
-            winsound.PlaySound(ALARM_WAV, winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT)
+            winsound.PlaySound(
+                ALARM_WAV,
+                winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_LOOP | winsound.SND_NODEFAULT)
+            if alarm_stop_timer is None:
+                alarm_stop_timer = QTimer()
+                alarm_stop_timer.setSingleShot(True)
+                alarm_stop_timer.timeout.connect(stop_alarm)
+            alarm_stop_timer.start(60000)  # ms: the alarm stops itself after 60 seconds
         else:
             winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
     except Exception:
@@ -189,6 +210,7 @@ class TickTrayApp:
             self.start_timer(minutes)
 
     def start_timer(self, minutes):
+        stop_alarm()
         self.total_seconds = minutes * 60
         self.deadline = time.monotonic() + self.total_seconds
         self.state = RUNNING
@@ -210,6 +232,7 @@ class TickTrayApp:
         self.refresh_ui()
 
     def stop_timer(self):
+        stop_alarm()
         self.timer.stop()
         self.state = IDLE
         self.refresh_ui()
@@ -315,6 +338,7 @@ class TickTrayApp:
             Qt.LayoutDirection.RightToLeft if i18n.is_rtl() else Qt.LayoutDirection.LeftToRight)
 
     def quit_app(self):
+        stop_alarm()
         if self.settings_dialog is not None:
             self.settings_dialog.force_close()
         self.app.quit()
