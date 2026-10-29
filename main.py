@@ -30,7 +30,7 @@ import winsound
 from PyQt6.QtCore import QLocale, QLockFile, QTime, QTimer, Qt
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
-    QApplication, QDialog, QDialogButtonBox, QInputDialog, QLabel, QMenu, QMessageBox,
+    QApplication, QDialog, QDialogButtonBox, QLabel, QLineEdit, QMenu, QMessageBox, QSpinBox,
     QSystemTrayIcon, QTimeEdit, QVBoxLayout,
 )
 
@@ -41,6 +41,7 @@ from tray_icon import render_icon
 
 QUICK_MINUTES = (5, 10, 25, 45)
 IDLE, RUNNING, PAUSED, FINISHED = range(4)
+EN_LOCALE = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
 
 BASE_DIR = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 ICON_PATH = os.path.join(BASE_DIR, "TickTray.ico")
@@ -100,29 +101,71 @@ def icon_label(seconds):
     return f"{math.ceil(minutes / 60)}h"
 
 
+def _dialog_buttons(dialog):
+    """Localised OK/Cancel row wired to `dialog`."""
+    buttons = QDialogButtonBox()
+    buttons.addButton(t("ok"), QDialogButtonBox.ButtonRole.AcceptRole)
+    buttons.addButton(t("cancel"), QDialogButtonBox.ButtonRole.RejectRole)
+    buttons.accepted.connect(dialog.accept)
+    buttons.rejected.connect(dialog.reject)
+    return buttons
+
+
+def _name_field():
+    """Optional timer name, 40 characters max."""
+    edit = QLineEdit()
+    edit.setMaxLength(40)
+    edit.setPlaceholderText(t("name_label"))
+    return edit
+
+
 class ClockTimeDialog(QDialog):
-    """Asks for a clock time (HH:mm, 24-hour) in Western digits."""
+    """Asks for a clock time (HH:mm, 24-hour) in Western digits, plus an optional name."""
 
     def __init__(self, initial_minutes):
         super().__init__()
         self.setWindowTitle(t("until_title"))
         self.time_edit = QTimeEdit()
         self.time_edit.setDisplayFormat("HH:mm")
-        # English locale keeps the numbers Western in both languages
-        self.time_edit.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
+        self.time_edit.setLocale(EN_LOCALE)  # Western digits in both languages
         self.time_edit.setTime(QTime.currentTime().addSecs(initial_minutes * 60))
-        buttons = QDialogButtonBox()
-        buttons.addButton(t("ok"), QDialogButtonBox.ButtonRole.AcceptRole)
-        buttons.addButton(t("cancel"), QDialogButtonBox.ButtonRole.RejectRole)
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
+        self.name_edit = _name_field()
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel(t("until_label")))
         layout.addWidget(self.time_edit)
-        layout.addWidget(buttons)
+        layout.addWidget(self.name_edit)
+        layout.addWidget(_dialog_buttons(self))
 
     def time(self):
         return self.time_edit.time()
+
+    def name(self):
+        return self.name_edit.text().strip()
+
+
+class CustomTimeDialog(QDialog):
+    """Asks for a number of minutes (1..top) and an optional name."""
+
+    def __init__(self, initial_minutes, top_minutes):
+        super().__init__()
+        self.setWindowTitle(t("custom_title"))
+        self.minutes_edit = QSpinBox()
+        self.minutes_edit.setLocale(EN_LOCALE)
+        self.minutes_edit.setRange(1, top_minutes)
+        self.minutes_edit.setValue(min(initial_minutes, top_minutes))
+        self.minutes_edit.setSuffix(t("min_suffix"))
+        self.name_edit = _name_field()
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel(t("custom_label")))
+        layout.addWidget(self.minutes_edit)
+        layout.addWidget(self.name_edit)
+        layout.addWidget(_dialog_buttons(self))
+
+    def minutes(self):
+        return self.minutes_edit.value()
+
+    def name(self):
+        return self.name_edit.text().strip()
 
 
 class TickTrayApp:
@@ -149,6 +192,7 @@ class TickTrayApp:
         self.total_seconds = 0
         self.deadline = 0.0
         self.paused_remaining = 0.0
+        self.timer_name = ""
         self.last_angle = None
         self.last_label = None
         self.settings_dialog = None
@@ -233,14 +277,14 @@ class TickTrayApp:
         self.start_timer(self.config["defaultMinutes"])
 
     def set_custom_timer(self):
-        top = self.config["maximumMinutes"]
-        minutes, ok = QInputDialog.getInt(
-            None, t("custom_title"), t("custom_label"),
-            min(self.config["lastCustomMinutes"], top), 1, top)
-        if ok:
-            self.config["lastCustomMinutes"] = minutes
-            self.save_quietly()
-            self.start_timer(minutes)
+        dlg = CustomTimeDialog(self.config["lastCustomMinutes"], self.config["maximumMinutes"])
+        dlg.setWindowIcon(self.app_icon)
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+        minutes = dlg.minutes()
+        self.config["lastCustomMinutes"] = minutes
+        self.save_quietly()
+        self.start_timer(minutes, name=dlg.name())
 
     def set_timer_until(self):
         dlg = ClockTimeDialog(self.config["defaultMinutes"])
@@ -253,10 +297,11 @@ class TickTrayApp:
         if seconds > self.config["maximumMinutes"] * 60:
             QMessageBox.warning(None, "TickTray", t("until_too_long", m=self.config["maximumMinutes"]))
             return
-        self.start_timer(0, seconds=seconds)
+        self.start_timer(0, seconds=seconds, name=dlg.name())
 
-    def start_timer(self, minutes, seconds=None):
+    def start_timer(self, minutes, seconds=None, name=""):
         stop_alarm()
+        self.timer_name = name
         self.total_seconds = seconds if seconds is not None else minutes * 60
         self.deadline = time.monotonic() + self.total_seconds
         self.state = RUNNING
@@ -314,7 +359,10 @@ class TickTrayApp:
             rem = self.remaining()
             shown = format_time(math.ceil(rem))
             # digits only, prefixed with LRM so Windows keeps Western digits (no Arabic context to shape them)
-            self.tray_icon.setToolTip("‎" + shown)
+            tip = "\u200e" + shown
+            if self.timer_name:
+                tip = f"{self.timer_name} {tip}"
+            self.tray_icon.setToolTip(tip)
             fraction = rem / self.total_seconds if self.total_seconds else 0
             angle = int(fraction * 360)
             label = icon_label(rem)
@@ -336,7 +384,7 @@ class TickTrayApp:
             play_alarm()
         self.tray_icon.showMessage(
             "TickTray",
-            t("notif"),
+            t("notif_named", name=self.timer_name) if self.timer_name else t("notif"),
             QSystemTrayIcon.MessageIcon.Information,
             8000,
         )
