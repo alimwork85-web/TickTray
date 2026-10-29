@@ -281,10 +281,10 @@ class TickTrayApp:
 
     def refresh_ui(self):
         """Sync menu texts/availability, tooltip and icon with the current state."""
-        self.action_start_default.setText(t("start_default", m=self.config["defaultMinutes"]))
+        self.action_start_default.setText(t("start_default", mm=i18n.minutes_text(self.config["defaultMinutes"])))
         self.quick_menu.setTitle(t("quick"))
         for a, m in self.quick_actions:
-            a.setText(t("quick_item", m=m))
+            a.setText(t("quick_item", mm=i18n.minutes_text(m)))
         self.action_custom.setText(t("custom"))
         self.action_until.setText(t("until"))
         self.action_stop.setText(t("cancel_timer"))
@@ -292,7 +292,7 @@ class TickTrayApp:
         self.action_extend.setEnabled(self.state != IDLE)
         self.action_settings.setText(t("settings_menu"))
         self.action_quit.setText(t("quit"))
-        self.action_snooze.setText(t("snooze", m=self.config["defaultSnoozeMinutes"]))
+        self.action_snooze.setText(t("snooze", mm=i18n.minutes_text(self.config["defaultSnoozeMinutes"])))
         self.action_snooze.setVisible(self.state == FINISHED)
         active = self.state in (RUNNING, PAUSED)
         self.action_pause_resume.setEnabled(active)
@@ -330,7 +330,7 @@ class TickTrayApp:
         if seconds <= 0:
             seconds += 24 * 3600  # that time already passed today: aim at tomorrow
         if seconds > self.config["maximumMinutes"] * 60:
-            QMessageBox.warning(None, "TickTray", t("until_too_long", m=self.config["maximumMinutes"]))
+            QMessageBox.warning(None, "TickTray", t("until_too_long", mm=i18n.minutes_text(self.config["maximumMinutes"])))
             return
         self.start_timer(0, seconds=seconds, name=dlg.name())
 
