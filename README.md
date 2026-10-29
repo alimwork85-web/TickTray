@@ -6,7 +6,7 @@
 
 **A tiny countdown timer that lives in your Windows system tray: one click to start, and it alerts you when time is up.**
 
-![version](https://img.shields.io/badge/version-0.2.1-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
+![version](https://img.shields.io/badge/version-0.3.0-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
 
 **English** · [العربية](#العربية)
 
@@ -31,6 +31,12 @@ Sometimes all you need is a quick timer: coffee on the stove, a break between wo
 - 🔵 **Live icon**: the icon shows the minutes left (or hours, e.g. `2h`, past 99 minutes) inside a ring that shrinks as time runs out, so you see it without hovering.
 - 🔢 **Digits only**: hover to see the countdown, e.g. `19:36`, always in Western digits (0-9).
 - ⚡ **Quick times**: 5 / 10 / 25 / 45 minutes, or a custom time that the app remembers.
+- 🕒 **Until a clock time**: pick a time of day (e.g. 14:30); if it already passed today, the timer aims at tomorrow.
+- ➕ **+5 minutes**: extend a running or paused timer without starting over, up to your maximum duration.
+- 🏷️ **Named timers**: give a timer a name such as "Coffee"; it appears in the tray tooltip and in the notification.
+- 🔔 **Repeating alarm**: the alarm keeps sounding until you stop it, and gives up on its own after 60 seconds.
+- 💾 **Survives a restart**: the timer keeps its place when you close and reopen the app; if it ended while closed, you get the finished mark and a notification.
+- ⌨️ **Ctrl+Alt+T**: start, pause or resume from any program without touching the tray.
 - 😴 **Snooze**: click the notification (or pick "Snooze" from the menu) when time is up.
 - 🌐 **Arabic and English**: switch the language from Settings (menus, notifications and windows, right-to-left for Arabic). The first run follows your Windows language.
 - ⚙️ **Modern settings**: animated window with light and dark themes; configure default duration, snooze length, maximum duration, alert sound and language.
@@ -103,6 +109,12 @@ Released under the [MIT License](LICENSE): free to use, modify and share.
 - 🔵 **أيقونة حيّة**: تعرض الأيقونة نفسها الدقائق المتبقية (أو الساعات مثل `2h` إذا تجاوزت 99 دقيقة) داخل حلقة تتناقص مع الوقت، فتراها دون المرور بالفأرة.
 - 🔢 **أرقام فقط**: عند مرور الفأرة يظهر العدّ التنازلي مثل `19:36`، وبأرقام غربية (0-9) دائماً.
 - ⚡ **أوقات سريعة**: 5 / 10 / 25 / 45 دقيقة، أو وقت مخصص يتذكّره البرنامج.
+- 🕒 **حتى الساعة**: اختر وقتاً محدداً (مثل `14:30`)؛ وإن كان قد مضى اليوم يحسبه للغد.
+- ➕ **+5 دقائق**: مدّد العداد أثناء العمل أو الإيقاف المؤقت دون البدء من جديد، وحتى الحد الأقصى.
+- 🏷️ **اسم للمؤقت**: أعطِ المؤقت اسماً مثل «القهوة» فيظهر في التلميح وفي الإشعار.
+- 🔔 **تنبيه متكرر**: يستمر الصوت حتى توقفه بنفسك، ويتوقف وحده بعد 60 ثانية كحد أقصى.
+- 💾 **يبقى بعد إعادة التشغيل**: يحفظ المؤقت مكانه عند إغلاق البرنامج وفتحه؛ وإن انتهى أثناء الإغلاق تجد علامة الانتهاء وإشعاراً.
+- ⌨️ **Ctrl+Alt+T**: ابدأ أو أوقف مؤقتاً أو استأنف من أي برنامج دون الوصول إلى الصينية.
 - 😴 **تأجيل**: عند انتهاء الوقت انقر الإشعار (أو اختر «تأجيل» من القائمة) لتأجيل التنبيه.
 - 🌐 **عربي وإنجليزي**: بدّل اللغة من الإعدادات (القوائم والإشعارات والنوافذ، ومن اليمين إلى اليسار في العربية). في أول تشغيل يتبع لغة Windows لديك.
 - ⚙️ **إعدادات عصرية**: نافذة بحركة انسيابية، تدعم الوضعين الفاتح والداكن، وتتحكم في المدة الافتراضية ومدة التأجيل والحد الأقصى وصوت التنبيه واللغة.

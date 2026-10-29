@@ -29,7 +29,7 @@ text = f"""VSVersionInfo(
     StringFileInfo([
       StringTable(
         '040904B0',
-        [StringStruct('CompanyName', 'alimwork85-web'),
+        [StringStruct('CompanyName', 'Ali Alhumedi'),
          StringStruct('FileDescription', 'TickTray - system tray countdown timer'),
          StringStruct('FileVersion', '{dotted}'),
          StringStruct('InternalName', 'TickTray'),
