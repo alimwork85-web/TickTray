@@ -6,7 +6,7 @@
 
 **A tiny countdown timer that lives in your Windows system tray: one click to start, and it alerts you when time is up.**
 
-![version](https://img.shields.io/badge/version-0.3.3-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
+![version](https://img.shields.io/badge/version-0.3.4-6366f1) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-8b3dd6) ![license](https://img.shields.io/badge/license-MIT-22c55e) ![python](https://img.shields.io/badge/Python-3.14-fbbf24)
 
 **English** · [العربية](#العربية)
 
@@ -44,6 +44,12 @@ Sometimes all you need is a quick timer: coffee on the stove, a break between wo
 - 🛡️ **Single instance**: running it twice never creates a second icon.
 - 🪶 **Lighter EXE**: unused Qt modules are left out of the build (about 26 MB instead of 38 MB).
 - ⏳ **Accurate**: time is computed from a fixed deadline, so it does not drift over long durations.
+
+## What's new in 0.3.4
+
+- **Arabic interface fixes**: the until-a-time field showed `08:27` as `27:08` in right-to-left, minute counts now use the correct singular/dual/plural («5 دقائق», «20 دقيقة»), the 5-minute entry reads «إضافة 5 دقائق», and the system tray is called what Windows calls it — «منطقة الإشعارات».
+- **Signed EXE** with the publisher name **Ali Alhumedi**, both in the file properties and in the Authenticode signature.
+- Full interface pass over both themes, the tray menu, the dialogs and the notifications.
 
 ## Download and run
 
@@ -122,6 +128,12 @@ Released under the [MIT License](LICENSE): free to use, modify and share.
 - 🛡️ **نسخة واحدة فقط**: لا تتكرر الأيقونة إن شغّلته مرتين.
 - 🪶 **ملف أخف**: تُستبعد وحدات Qt غير المستخدمة من البناء (نحو 26 MB بدل 38 MB).
 - ⏳ **دقيق**: يحسب الوقت من موعد انتهاء ثابت، فلا يتراكم عليه انحراف مع طول المدة.
+
+## الجديد في 0.3.4
+
+- **إصلاحات الواجهة العربية**: حقل «حتى الساعة» كان يعرض `08:27` بالشكل `27:08` في الاتجاه من اليمين إلى اليسار، وصيغ الدقائق صارت تتبع العربية («5 دقائق»، «20 دقيقة»)، وبند التمديد صار «إضافة 5 دقائق»، ومنطقة النظام صارت تُسمّى بمصطلح Windows نفسه «منطقة الإشعارات».
+- **ملف موقَّع** باسم الناشر **Ali Alhumedi**، في خصائص الملف وفي توقيع Authenticode معاً.
+- فحص كامل للواجهة في الوضعين الفاتح والداكن، وللقائمة والحوارات والإشعارات.
 
 ## التحميل والتشغيل
 
