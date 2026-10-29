@@ -16,6 +16,10 @@ DEFAULT_CONFIG = {
     "startWithWindows": False,
     "lastCustomMinutes": 20,
     "language": None,
+    "timerEndsAt": None,
+    "timerPausedRemaining": None,
+    "timerTotal": None,
+    "timerName": "",
 }
 HARD_MAX_MINUTES = 10080
 
@@ -46,6 +50,13 @@ def _as_int(value, default, low, high):
     return max(low, min(high, int(value)))
 
 
+def _as_positive(value):
+    """A positive number (wall-clock seconds) or None."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return value if value > 0 else None
+
+
 def validate(raw):
     cfg = dict(DEFAULT_CONFIG)
     if isinstance(raw, dict):
@@ -58,6 +69,13 @@ def validate(raw):
         cfg["language"] = system_language()
     cfg["completionSound"] = bool(cfg["completionSound"])
     cfg["startWithWindows"] = bool(cfg["startWithWindows"])
+    cfg["timerEndsAt"] = _as_positive(cfg["timerEndsAt"])
+    cfg["timerPausedRemaining"] = _as_positive(cfg["timerPausedRemaining"])
+    total = _as_positive(cfg["timerTotal"])
+    cfg["timerTotal"] = int(total) if total and int(total) > 0 else None
+    if not isinstance(cfg["timerName"], str):
+        cfg["timerName"] = ""
+    cfg["timerName"] = cfg["timerName"][:40]
     return cfg
 
 

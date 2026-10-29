@@ -209,9 +209,15 @@ class TickTrayApp:
         self.tray_icon.activated.connect(self.on_activated)
         self.tray_icon.messageClicked.connect(self.on_message_clicked)
 
+        self.restore_timer()
+        if self.state == RUNNING:
+            self.timer.start()
+
         self.create_menu()
         self.refresh_ui()
         self.tray_icon.show()
+        if self.state == FINISHED:
+            self.notify()  # ended while TickTray was closed: show it, but do not alarm
 
     # ---- menu -------------------------------------------------------------------------------------------------
     def create_menu(self):
@@ -307,6 +313,7 @@ class TickTrayApp:
         self.state = RUNNING
         self.timer.start()
         self.refresh_ui()
+        self.remember_timer()
 
     def snooze(self):
         self.start_timer(self.config["defaultSnoozeMinutes"])
@@ -321,6 +328,7 @@ class TickTrayApp:
             self.state = RUNNING
             self.timer.start()
         self.refresh_ui()
+        self.remember_timer()
 
     def add_five_minutes(self):
         """Extend the running/paused timer by 5 minutes, or start a fresh 5-minute one after it finished."""
@@ -338,12 +346,43 @@ class TickTrayApp:
         else:
             self.paused_remaining += extra
         self.refresh_ui()
+        self.remember_timer()
 
     def stop_timer(self):
         stop_alarm()
         self.timer.stop()
         self.state = IDLE
         self.refresh_ui()
+        self.remember_timer()
+
+    # ---- persistence ------------------------------------------------------------------------------------------
+    def remember_timer(self):
+        """Store the timer in config.json (wall clock) so it survives a restart."""
+        active = self.state in (RUNNING, PAUSED)
+        self.config["timerEndsAt"] = time.time() + self.remaining() if self.state == RUNNING else None
+        self.config["timerPausedRemaining"] = self.remaining() if self.state == PAUSED else None
+        self.config["timerTotal"] = max(1, int(self.total_seconds)) if active else None
+        self.config["timerName"] = self.timer_name if active else ""
+        self.save_quietly()
+
+    def restore_timer(self):
+        """Pick the timer back up from config.json; ended while closed means FINISHED, silently."""
+        total = self.config.get("timerTotal")
+        if not total:
+            return
+        self.total_seconds = total
+        self.timer_name = self.config.get("timerName") or ""
+        paused = self.config.get("timerPausedRemaining")
+        ends_at = self.config.get("timerEndsAt")
+        if paused:
+            self.paused_remaining = min(paused, float(total))
+            self.state = PAUSED
+        elif ends_at and ends_at > time.time():
+            self.deadline = time.monotonic() + (ends_at - time.time())
+            self.state = RUNNING
+        elif ends_at:
+            self.state = FINISHED
+        self.remember_timer()
 
     def tick(self):
         if self.remaining() <= 0:
@@ -379,15 +418,19 @@ class TickTrayApp:
             self.last_angle = None
             self.tray_icon.setIcon(render_icon())
 
-    def on_timer_finished(self):
-        if self.config.get("completionSound"):
-            play_alarm()
+    def notify(self):
         self.tray_icon.showMessage(
             "TickTray",
             t("notif_named", name=self.timer_name) if self.timer_name else t("notif"),
             QSystemTrayIcon.MessageIcon.Information,
             8000,
         )
+
+    def on_timer_finished(self):
+        if self.config.get("completionSound"):
+            play_alarm()
+        self.notify()
+        self.remember_timer()
 
     # ---- tray interaction -------------------------------------------------------------------------------------
     def on_activated(self, reason):
