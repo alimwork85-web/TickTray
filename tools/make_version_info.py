@@ -33,7 +33,7 @@ text = f"""VSVersionInfo(
          StringStruct('FileDescription', 'TickTray - system tray countdown timer'),
          StringStruct('FileVersion', '{dotted}'),
          StringStruct('InternalName', 'TickTray'),
-         StringStruct('LegalCopyright', 'MIT License'),
+         StringStruct('LegalCopyright', '© 2026 Ali Alhumedi'),
          StringStruct('OriginalFilename', 'TickTray.exe'),
          StringStruct('ProductName', 'TickTray'),
          StringStruct('ProductVersion', '{dotted}')])

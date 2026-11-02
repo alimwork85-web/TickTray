@@ -17,7 +17,7 @@ VSVersionInfo(
          StringStruct('FileDescription', 'TickTray - system tray countdown timer'),
          StringStruct('FileVersion', '0.3.4.0'),
          StringStruct('InternalName', 'TickTray'),
-         StringStruct('LegalCopyright', 'MIT License'),
+         StringStruct('LegalCopyright', '© 2026 Ali Alhumedi'),
          StringStruct('OriginalFilename', 'TickTray.exe'),
          StringStruct('ProductName', 'TickTray'),
          StringStruct('ProductVersion', '0.3.4.0')])
