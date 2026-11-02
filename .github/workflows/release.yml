@@ -1,0 +1,58 @@
+# Builds TickTray on GitHub and attaches the EXE to the release, so every download is built from the published code.
+# Runs when a release is published (write its notes first, then publish), or by hand for an existing tag.
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build and attach (e.g. v0.3.4)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+      SIGN_PFX: ${{ secrets.SIGN_PFX }}
+      SIGN_PFX_PASSWORD: ${{ secrets.SIGN_PFX_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Build
+        shell: pwsh
+        run: |
+          python -m pip install -r requirements.txt
+          pyinstaller TickTray.spec
+          # The file's version must match the tag, or version.py / version_info.txt was not bumped.
+          $v = $env:TAG.TrimStart('v')
+          $file = (Get-Item dist/TickTray.exe).VersionInfo.ProductVersion
+          if ($file -ne "$v.0") { throw "version_info.txt says $file, the tag says $v" }
+
+      # Optional: signs with the same certificate as the local builds when the SIGN_PFX secret (base64 .pfx) is set.
+      - name: Sign
+        if: env.SIGN_PFX != ''
+        shell: pwsh
+        run: |
+          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP/sign.pfx", [Convert]::FromBase64String($env:SIGN_PFX))
+          $pw = ConvertTo-SecureString $env:SIGN_PFX_PASSWORD -AsPlainText -Force
+          $cert = Get-PfxCertificate -FilePath "$env:RUNNER_TEMP/sign.pfx" -Password $pw
+          Set-AuthenticodeSignature dist/TickTray.exe -Certificate $cert -HashAlgorithm SHA256 `
+            -TimestampServer http://timestamp.digicert.com | Format-List Status, StatusMessage
+          Remove-Item "$env:RUNNER_TEMP/sign.pfx"
+
+      - name: Attach to the release
+        shell: pwsh
+        run: gh release upload $env:TAG dist/TickTray.exe --clobber
